@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Staff · {{ hotel_name }}{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>Staff</h1>
+  <p class="sub">Admins manage everything. Receptionists handle bookings and guests. Housekeeping only updates room status.</p></div>
+  <button class="btn" data-dialog="userDialog">Add staff member</button></div>
+<div class="tablewrap"><table>
+  <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr>
+  {% for u in users %}<tr><td>{{ u.name }}</td><td>{{ u.email }}</td><td>{{ u.role|label }}</td>
+    <td>{% if u.is_active %}<span class="badge b-clean">Active</span>{% else %}<span class="badge b-maintenance">Disabled</span>{% endif %}</td>
+    <td><button class="btn ghost sm" data-dialog="userDialog" data-fill='{{ {"id": u.id, "name": u.name, "email": u.email, "role": u.role, "is_active": u.is_active == 1}|tojson|forceescape }}'>Edit</button></td></tr>
+  {% endfor %}
+</table></div>
+<dialog id="userDialog"><form method="post" action="{{ url_for('user_save') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id">
+  <h2 data-title data-add="Add staff member" data-edit="Edit staff member">Add staff member</h2>
+  <div class="field"><label>Name</label><input name="name" maxlength="120" required></div>
+  <div class="field"><label>Email (sign-in)</label><input name="email" type="email" maxlength="190" required></div>
+  <div class="field"><label>Role</label><select name="role"><option value="receptionist">Receptionist</option><option value="housekeeping">Housekeeping</option><option value="admin">Admin</option></select></div>
+  <div class="field"><label>Password</label><input name="password" type="password" minlength="8" autocomplete="new-password"><div class="hint">Required for new staff. When editing, leave blank to keep the current password.</div></div>
+  <div class="field"><label><input type="checkbox" name="is_active" value="1" checked> Account is active</label></div>
+  <div class="row"><button class="btn">Save</button><button type="button" class="btn ghost" data-close>Cancel</button></div>
+</form></dialog>
+{% endblock %}

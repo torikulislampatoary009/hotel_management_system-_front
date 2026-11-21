@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Reports · {{ hotel_name }}{% endblock %}
+{% block content %}
+<h1>Payments report</h1><p class="sub">Money received, by day and by method.</p>
+<form class="filters" method="get">
+  <div class="field"><label>From</label><input type="date" name="from" value="{{ r['from'] }}"></div>
+  <div class="field"><label>To</label><input type="date" name="to" value="{{ r['to'] }}"></div>
+  <button class="btn ghost">Show</button>
+</form>
+<div class="stats"><div class="stat"><span>Received {{ r['from'] }} to {{ r['to'] }}</span><b>{{ r.total|money }}</b></div>
+  {% for s in r.bookings_by_status %}<div class="stat"><span>{{ s.status|label }} bookings</span><b>{{ s.bookings }}</b></div>{% endfor %}</div>
+<div class="grid g2">
+  <div><h2>By day</h2><div class="tablewrap"><table>
+    <tr><th>Date</th><th class="num">Payments</th><th class="num">Total</th><th style="width:35%"></th></tr>
+    {% for d in r.daily %}<tr><td>{{ d.day }}</td><td class="num">{{ d.payments }}</td><td class="num">{{ d.total|money }}</td>
+      <td><span class="bar" style="width:{{ ((d.total / peak) * 100)|round|int if d.total > 0 else 0 }}%"></span></td></tr>
+    {% else %}<tr><td colspan="4" class="empty">No payments in this period.</td></tr>{% endfor %}</table></div></div>
+  <div><h2>By method</h2><div class="tablewrap"><table>
+    <tr><th>Method</th><th class="num">Payments</th><th class="num">Total</th></tr>
+    {% for m in r.by_method %}<tr><td>{{ m.method|label }}</td><td class="num">{{ m.payments }}</td><td class="num">{{ m.total|money }}</td></tr>
+    {% else %}<tr><td colspan="3" class="empty">Nothing recorded.</td></tr>{% endfor %}</table></div></div>
+</div>
+{% endblock %}

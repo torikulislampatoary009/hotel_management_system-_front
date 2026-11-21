@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ hotel_name }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% macro flashes() %}
+  {% for cat, msg in get_flashed_messages(with_categories=true) %}
+    <div class="flash {{ cat }}" role="{{ 'alert' if cat == 'error' else 'status' }}">{{ msg }}</div>
+  {% endfor %}
+{% endmacro %}
+
+{% if me %}
+{% set ep = request.endpoint or '' %}
+<div class="shell">
+  <aside class="side">
+    <div class="brand">{{ hotel_name }}</div>
+    {% if me.role in ('admin','receptionist') %}
+      <a class="nav {{ 'on' if ep == 'dashboard' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a class="nav {{ 'on' if ep.startswith('booking') }}" href="{{ url_for('bookings') }}">Bookings</a>
+      <a class="nav {{ 'on' if ep.startswith('guest') }}" href="{{ url_for('guests') }}">Guests</a>
+    {% endif %}
+    <a class="nav {{ 'on' if ep in ('rooms',) }}" href="{{ url_for('rooms') }}">{{ 'Rooms' if me.role != 'housekeeping' else 'Housekeeping' }}</a>
+    {% if me.role == 'admin' %}
+      <a class="nav {{ 'on' if ep == 'reports' }}" href="{{ url_for('reports') }}">Reports</a>
+      <a class="nav {{ 'on' if ep == 'users' }}" href="{{ url_for('users') }}">Staff</a>
+    {% endif %}
+    <div class="who">
+      {{ me.name }}<small>{{ me.role|label }}</small>
+      <a class="nav" style="padding-left:0" href="{{ url_for('account') }}">Change password</a>
+      <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="linkbtn">Sign out</button></form>
+    </div>
+  </aside>
+  <main>
+    {{ flashes() }}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+<main class="auth"><div>{{ flashes() }}{% block auth %}{% endblock %}</div></main>
+{% endif %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

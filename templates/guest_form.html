@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ 'Edit guest' if editing else 'Add guest' }}</h1><p class="sub">&nbsp;</p>
+<form class="card" method="post" style="max-width:760px">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="fields">
+    <div class="field"><label>First name</label><input name="first_name" value="{{ g.get('first_name','') }}" maxlength="80" required></div>
+    <div class="field"><label>Last name</label><input name="last_name" value="{{ g.get('last_name','') }}" maxlength="80" required></div>
+    <div class="field"><label>Phone</label><input name="phone" value="{{ g.get('phone') or '' }}" maxlength="40"></div>
+    <div class="field"><label>Email</label><input name="email" type="email" value="{{ g.get('email') or '' }}" maxlength="190"></div>
+    <div class="field"><label>ID type</label><select name="id_type">
+      {% for t in ('', 'Passport', 'National ID', 'Driving licence', 'Other') %}<option value="{{ t }}" {{ 'selected' if (g.get('id_type') or '') == t }}>{{ t or 'Not recorded' }}</option>{% endfor %}</select></div>
+    <div class="field"><label>ID number</label><input name="id_number" value="{{ g.get('id_number') or '' }}" maxlength="60"></div>
+  </div>
+  <div class="field mt"><label>Address</label><input name="address" value="{{ g.get('address') or '' }}" maxlength="255"></div>
+  <div class="field"><label>Notes</label><textarea name="notes" maxlength="500">{{ g.get('notes') or '' }}</textarea></div>
+  <div class="row"><button class="btn">Save guest</button><a class="btn ghost" href="{{ url_for('guest_detail', gid=gid) if editing else url_for('guests') }}">Cancel</a></div>
+</form>
+{% endblock %}

@@ -1,1 +1,14 @@
-
+{% extends "base.html" %}
+{% block title %}Sign in · {{ hotel_name }}{% endblock %}
+{% block auth %}
+<div class="card">
+  <h1>{{ hotel_name }}</h1>
+  <p class="sub">Sign in to manage bookings, rooms and guests.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" value="{{ email }}" autocomplete="username" required autofocus></div>
+    <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+    <button class="btn" style="width:100%">Sign in</button>
+  </form>
+</div>
+{% endblock %}

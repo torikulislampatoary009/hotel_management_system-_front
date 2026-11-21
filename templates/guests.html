@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pager with context %}
+{% block title %}Guests · {{ hotel_name }}{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>Guests</h1><p class="sub">Search by name, phone, email or ID number.</p></div>
+  <a class="btn" href="{{ url_for('guest_new') }}">Add guest</a></div>
+<form class="filters" method="get"><div class="field" style="min-width:280px"><label for="q">Search</label><input id="q" name="q" value="{{ q }}" autofocus></div><button class="btn ghost">Search</button></form>
+<div class="tablewrap"><table>
+  <tr><th>Name</th><th>Phone</th><th>Email</th><th>ID</th><th></th></tr>
+  {% for g in guests %}<tr><td><a href="{{ url_for('guest_detail', gid=g.id) }}">{{ g.first_name }} {{ g.last_name }}</a></td><td>{{ g.phone or '' }}</td><td>{{ g.email or '' }}</td>
+    <td>{{ g.id_type or '' }} {{ g.id_number or '' }}</td>
+    <td class="row"><a class="btn ghost sm" href="{{ url_for('booking_new', guest_id=g.id) }}">Book a room</a><a class="btn ghost sm" href="{{ url_for('guest_edit', gid=g.id) }}">Edit</a></td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No guests found. Guests are also added when you create a booking.</td></tr>{% endfor %}
+</table></div>
+{{ pager(page, total, per) }}
+{% endblock %}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice {{ b.reference }}</title>
+<style>
+  body{font:14px/1.5 "IBM Plex Sans",system-ui,Arial,sans-serif;color:#1b2733;margin:0;background:#eef1f4}
+  .sheet{max-width:780px;margin:1.5rem auto;background:#fff;padding:2.2rem 2.5rem;border:1px solid #d5dce4}
+  h1{margin:0;font-size:1.6rem} .muted{color:#5d6b7a}
+  table{width:100%;border-collapse:collapse;margin-top:1.2rem}
+  th,td{padding:.45rem .5rem;border-bottom:1px solid #d5dce4;text-align:left} th{font-size:.8rem;color:#5d6b7a}
+  .r{text-align:right;font-variant-numeric:tabular-nums}
+  .head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .tot{margin-left:auto;width:300px;margin-top:1rem} .tot div{display:flex;justify-content:space-between;padding:.2rem 0}
+  .tot .g{border-top:2px solid #1b2733;font-weight:600;font-size:1.1rem;margin-top:.3rem;padding-top:.4rem}
+  button{font:inherit;padding:.5rem 1rem;margin:1rem auto;display:block}
+  @media print{body{background:#fff}.sheet{border:0;margin:0;padding:0}button{display:none}}
+</style></head><body>
+{% set c = b.hotel.currency %}{% set t = b.totals %}
+{% macro m(v) %}{{ '-' if v < 0 }}{{ c }}{{ '{:,.2f}'.format(v|abs) }}{% endmacro %}
+<div class="sheet">
+  <div class="head">
+    <div><h1>{{ b.hotel.name }}</h1><div class="muted">{{ b.hotel.address }}<br>{{ b.hotel.phone }} {{ b.hotel.email }}</div></div>
+    <div style="text-align:right"><h1>Invoice</h1><div class="muted">{{ b.reference }}<br>Status: {{ b.status|label }}</div></div>
+  </div>
+  <p><b>{{ b.guest_first_name }} {{ b.guest_last_name }}</b><br><span class="muted">{{ b.guest_phone or '' }} {{ b.guest_email or '' }}</span></p>
+  <p class="muted">Room {{ b.room_number }} ({{ b.room_type }}) · {{ b.check_in }} to {{ b.check_out }} · {{ t.nights }} night{{ '' if t.nights == 1 else 's' }}</p>
+  <table>
+    <tr><th>Description</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Amount</th></tr>
+    <tr><td>Room {{ b.room_number }}, {{ b.room_type }}</td><td class="r">{{ t.nights }}</td><td class="r">{{ m(b.rate_per_night) }}</td><td class="r">{{ m(t.room_total) }}</td></tr>
+    {% if b.status != 'cancelled' %}{% for ch in b.charges %}<tr><td>{{ ch.description }}</td><td class="r">{{ ch.quantity }}</td><td class="r">{{ m(ch.unit_price) }}</td><td class="r">{{ m(ch.line_total) }}</td></tr>{% endfor %}{% endif %}
+  </table>
+  <div class="tot">
+    <div><span>Subtotal</span><span>{{ m(t.subtotal) }}</span></div>
+    {% if t.tax_percent %}<div><span>Tax ({{ t.tax_percent }}%)</span><span>{{ m(t.tax) }}</span></div>{% endif %}
+    <div class="g"><span>Total</span><span>{{ m(t.total) }}</span></div>
+    <div><span>Paid</span><span>{{ m(t.paid) }}</span></div>
+    <div><span>{{ 'Balance due' if t.balance > 0 else 'Balance' }}</span><span>{{ m(t.balance) }}</span></div>
+  </div>
+  {% if b.payments %}<table><tr><th>Payment date</th><th>Method</th><th>Reference</th><th class="r">Amount</th></tr>
+    {% for p in b.payments %}<tr><td>{{ p.created_at[:16] }}</td><td>{{ p.method|label }}</td><td>{{ p.reference or '' }}</td><td class="r">{{ m(p.amount) }}</td></tr>{% endfor %}</table>{% endif %}
+  <p class="muted" style="margin-top:2rem">Thank you for staying with us.</p>
+</div>
+<button onclick="window.print()">Print invoice</button>
+</body></html>

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, pager with context %}
+{% block title %}Bookings · {{ hotel_name }}{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>Bookings</h1><p class="sub">Reservations, guests in house and past stays.</p></div>
+  <a class="btn" href="{{ url_for('booking_new') }}">New booking</a></div>
+<div class="tabs">
+  <a class="{{ 'on' if not f.get('view') and not f.get('status') }}" href="{{ url_for('bookings') }}">All</a>
+  <a class="{{ 'on' if f.get('view') == 'arrivals' }}" href="{{ url_for('bookings', view='arrivals') }}">Arriving today</a>
+  <a class="{{ 'on' if f.get('view') == 'in_house' }}" href="{{ url_for('bookings', view='in_house') }}">In house</a>
+  <a class="{{ 'on' if f.get('view') == 'departures' }}" href="{{ url_for('bookings', view='departures') }}">Due out</a>
+  <a class="{{ 'on' if f.get('status') == 'reserved' }}" href="{{ url_for('bookings', status='reserved') }}">Upcoming</a>
+  <a class="{{ 'on' if f.get('status') == 'cancelled' }}" href="{{ url_for('bookings', status='cancelled') }}">Cancelled</a>
+</div>
+<form class="filters" method="get">
+  {% if f.get('view') %}<input type="hidden" name="view" value="{{ f.get('view') }}">{% endif %}
+  <div class="field" style="min-width:240px"><label for="q">Search</label><input id="q" name="q" value="{{ f.get('q','') }}" placeholder="Reference, guest, phone or room"></div>
+  <div class="field"><label>Status</label><select name="status"><option value="">Any</option>
+    {% for s in ('reserved','checked_in','checked_out','cancelled') %}<option value="{{ s }}" {{ 'selected' if f.get('status') == s }}>{{ s|label }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Arriving from</label><input type="date" name="from" value="{{ f.get('from','') }}"></div>
+  <div class="field"><label>Arriving to</label><input type="date" name="to" value="{{ f.get('to','') }}"></div>
+  <button class="btn ghost">Apply</button>
+</form>
+<div class="tablewrap"><table>
+  <tr><th>Reference</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr>
+  {% for b in bookings %}<tr>
+    <td><a href="{{ url_for('booking_detail', bid=b.id) }}">{{ b.reference }}</a></td>
+    <td>{{ b.guest_first_name }} {{ b.guest_last_name }}</td><td>{{ b.room_number }} <small>{{ b.room_type }}</small></td>
+    <td>{{ b.check_in }}</td><td>{{ b.check_out }}</td><td>{{ badge(b.status) }}</td></tr>
+  {% else %}<tr><td colspan="6" class="empty">No bookings match these filters.</td></tr>{% endfor %}
+</table></div>
+{{ pager(page, total, per) }}
+{% endblock %}

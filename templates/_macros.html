@@ -1,0 +1,11 @@
+{% macro badge(status) %}<span class="badge b-{{ status }}">{{ status|label }}</span>{% endmacro %}
+
+{% macro pager(page, total, per) %}
+{% set pages = ((total + per - 1) // per) or 1 %}
+<div class="pager">
+  <span>{{ total }} result{{ '' if total == 1 else 's' }}</span>
+  {% if page > 1 %}<a class="btn ghost sm" href="{{ request.path }}?{{ qs(page=page - 1) }}">Previous</a>{% endif %}
+  <span>Page {{ page }} of {{ pages }}</span>
+  {% if page < pages %}<a class="btn ghost sm" href="{{ request.path }}?{{ qs(page=page + 1) }}">Next</a>{% endif %}
+</div>
+{% endmacro %}

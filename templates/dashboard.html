@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · {{ hotel_name }}{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>Today at {{ hotel_name }}</h1><p class="sub">{{ s.date }}</p></div>
+  <a class="btn" href="{{ url_for('booking_new') }}">New booking</a></div>
+
+{% if s.overdue_departures %}
+<div class="flash error">{{ s.overdue_departures }} guest{{ '' if s.overdue_departures == 1 else 's' }} should have checked out already.
+  <a href="{{ url_for('bookings', view='departures') }}">Review departures</a></div>
+{% endif %}
+
+<div class="stats">
+  <div class="stat"><span>Occupancy</span><b>{{ s.occupancy_rate }}%</b></div>
+  <div class="stat"><span>Arrivals today</span><b>{{ s.arrivals_today }}</b></div>
+  <div class="stat"><span>Departures today</span><b>{{ s.departures_today }}</b></div>
+  <div class="stat"><span>Guests in house</span><b>{{ s.in_house_guests }}</b></div>
+  <div class="stat"><span>Vacant rooms</span><b>{{ s.vacant_rooms }}</b></div>
+  <div class="stat {{ 'warn' if s.dirty_rooms }}"><span>Rooms to clean</span><b>{{ s.dirty_rooms }}</b></div>
+  {% if s.revenue_today is not none %}
+  <div class="stat"><span>Payments today</span><b>{{ s.revenue_today|money }}</b></div>
+  <div class="stat"><span>Payments this month</span><b>{{ s.revenue_month|money }}</b></div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Room board</h2>
+  <div class="legend">
+    <span><i style="background:#fff;border-left:4px solid var(--green)"></i>Vacant and clean</span>
+    <span><i style="background:var(--harbour)"></i>Occupied</span>
+    <span><i style="background:#fffaf0;border-left:4px solid var(--amber)"></i>Needs cleaning</span>
+    <span><i style="background:#e8ebee"></i>Maintenance</span>
+  </div>
+  {% for floor, rs in floors %}
+  <div class="floor"><h3>Floor {{ floor }}</h3>
+    <div class="board">
+    {% for r in rs %}
+      {% if r.occupied %}
+        <a class="tile occ" href="{{ url_for('booking_detail', bid=r.booking_id) }}" title="{{ r.guest_name }}, leaves {{ r.booking_check_out }}"><b>{{ r.room_number }}</b><small>{{ r.guest_name }}</small></a>
+      {% elif r.housekeeping_status == 'maintenance' %}
+        <a class="tile maint" href="{{ url_for('rooms', q=r.room_number) }}"><b>{{ r.room_number }}</b><small>Maintenance</small></a>
+      {% elif r.housekeeping_status == 'dirty' %}
+        <a class="tile dirty" href="{{ url_for('rooms', q=r.room_number) }}"><b>{{ r.room_number }}</b><small>Needs cleaning</small></a>
+      {% else %}
+        <a class="tile" href="{{ url_for('booking_new', room_id=r.id) }}" title="Book this room"><b>{{ r.room_number }}</b><small>{{ r.type_name }}</small></a>
+      {% endif %}
+    {% endfor %}
+    </div></div>
+  {% else %}<div class="empty">No rooms yet. An admin can add them under Rooms.</div>{% endfor %}
+</div>
+
+<div class="grid g2">
+  <div><h2>Arriving today</h2>
+    <div class="tablewrap"><table>
+      <tr><th>Guest</th><th>Room</th><th>Leaves</th></tr>
+      {% for b in s.arrivals %}<tr><td><a href="{{ url_for('booking_detail', bid=b.id) }}">{{ b.guest_first_name }} {{ b.guest_last_name }}</a></td><td>{{ b.room_number }}</td><td>{{ b.check_out }}</td></tr>
+      {% else %}<tr><td colspan="3" class="empty">No arrivals left today.</td></tr>{% endfor %}
+    </table></div></div>
+  <div><h2>Departing today</h2>
+    <div class="tablewrap"><table>
+      <tr><th>Guest</th><th>Room</th><th>Due out</th></tr>
+      {% for b in s.departures %}<tr><td><a href="{{ url_for('booking_detail', bid=b.id) }}">{{ b.guest_first_name }} {{ b.guest_last_name }}</a></td><td>{{ b.room_number }}</td><td>{{ b.check_out }}</td></tr>
+      {% else %}<tr><td colspan="3" class="empty">No departures due.</td></tr>{% endfor %}
+    </table></div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block auth %}<div class="card"><h1>{{ status }}</h1><p>{{ message }}</p><a class="btn" href="{{ url_for('login') }}">Back to sign in</a></div>{% endblock %}
+{% block content %}<h1>{{ status }}</h1><p class="sub">{{ message }}</p><a class="btn ghost" href="javascript:history.back()">Go back</a>{% endblock %}

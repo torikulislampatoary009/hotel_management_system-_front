@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge with context %}
+{% block content %}
+<div class="row between"><div><h1>{{ g.first_name }} {{ g.last_name }}</h1><p class="sub">Guest since {{ g.created_at[:10] }}</p></div>
+  <div class="row"><a class="btn" href="{{ url_for('booking_new', guest_id=g.id) }}">Book a room</a><a class="btn ghost" href="{{ url_for('guest_edit', gid=g.id) }}">Edit</a></div></div>
+<div class="card"><dl class="kv">
+  <dt>Phone</dt><dd>{{ g.phone or 'Not recorded' }}</dd><dt>Email</dt><dd>{{ g.email or 'Not recorded' }}</dd>
+  <dt>ID</dt><dd>{{ ((g.id_type or '') ~ ' ' ~ (g.id_number or ''))|trim or 'Not recorded' }}</dd>
+  <dt>Address</dt><dd>{{ g.address or 'Not recorded' }}</dd><dt>Notes</dt><dd>{{ g.notes or '' }}</dd></dl></div>
+<h2>Stays</h2>
+<div class="tablewrap"><table>
+  <tr><th>Reference</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr>
+  {% for b in g.bookings %}<tr><td><a href="{{ url_for('booking_detail', bid=b.id) }}">{{ b.reference }}</a></td><td>{{ b.room_number }}</td><td>{{ b.check_in }}</td><td>{{ b.check_out }}</td><td>{{ badge(b.status) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No stays yet.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}
